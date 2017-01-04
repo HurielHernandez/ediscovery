@@ -9,6 +9,8 @@
         "jenky/laravel-plupload": "^1.2",
         "jildertmiedema/laravel-plupload": "^0.4.1",
         "laravel/framework": "5.3.*",
+        "pragmarx/firewall": "^1.0",
+        "pragmarx/tracker": "^3.0",
         "tcg/voyager": "^0.10.4"
     },
     "require-dev": {

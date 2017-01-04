@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Auth;
 
 class User extends Authenticatable
 {
@@ -15,7 +16,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'bar_number', 'token'
     ];
 
     /**
@@ -26,4 +27,26 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    protected $dates =['access_on'];
+
+
+    public function cases()
+    {
+        
+        return $this->belongsToMany('App\Cases', 'user_case', 'case_id', 'user_id')
+                    ->withPivot('access_on', 'revoke_on');
+    }
+
+    public function files()
+    {
+        
+        return $this->belongsToMany('App\Files', 'user_file', 'file_id', 'user_id')
+                    ->withPivot('access_count');
+    }
+
+    public function getIsAdminAttribute()
+    {
+        return( $this->role_id == 1);    
+    }
 }

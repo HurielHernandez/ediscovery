@@ -64,7 +64,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'America/Chicago',
 
     /*
     |--------------------------------------------------------------------------
@@ -178,7 +178,9 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         TCG\Voyager\VoyagerServiceProvider::class,
-        JildertMiedema\LaravelPlupload\LaravelPluploadServiceProvider::class,
+        PragmaRX\Firewall\Vendor\Laravel\ServiceProvider::class,
+        PragmaRX\Tracker\Vendor\Laravel\ServiceProvider::class,
+
 
     ],
 
@@ -227,7 +229,8 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,   
-        'Plupload' => JildertMiedema\LaravelPlupload\Facades\Plupload::class,
+        'Firewall' => PragmaRX\Firewall\Vendor\Laravel\Facade::class,
+        'Tracker' => PragmaRX\Tracker\Vendor\Laravel\Facade::class
 
     ],
 

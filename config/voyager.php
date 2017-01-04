@@ -13,7 +13,7 @@ return [
 
     'user' => [
         'add_default_role_on_register' => true,
-        'default_role'                 => 'user',
+        'default_role'                 => 'unconfirmed',
         'admin_permission'             => 'browse_admin',
         'namespace'                    => App\User::class,
     ],
@@ -66,7 +66,7 @@ return [
 
     'database' => [
         'tables' => [
-            'hidden' => [], // database tables that are hidden from the admin panel
+            'hidden' => ['user_case', 'user_file'], // database tables that are hidden from the admin panel
         ],
     ],
 
