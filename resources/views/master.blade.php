@@ -48,9 +48,7 @@
 
 <body class="flat-blue">
 
-<div id="voyager-loader">
-    <img src="{{ config('voyager.assets_path') }}/images/logo-icon.png" alt="Voyager Loader">
-</div>
+
 
 <?php
 $user_avatar = Voyager::image(Auth::user()->avatar);
@@ -74,7 +72,7 @@ $menuExpanded = isset($_COOKIE['expandedMenu']) && $_COOKIE['expandedMenu'] == 1
                             <li class="active"><i class="voyager-home"></i> Dashboard</li>
                         @else
                             <li class="active">
-                                <a href="{{ route('voyager.dashboard')}}"><i class="voyager-home"></i> Dashboard</a>
+                                <a href="/home"><i class="voyager-home"></i> Dashboard</a>
                             </li>
                         @endif
                         <?php $breadcrumb_url = ''; ?>
@@ -135,7 +133,7 @@ $menuExpanded = isset($_COOKIE['expandedMenu']) && $_COOKIE['expandedMenu'] == 1
             <nav class="navbar navbar-default" role="navigation" >
                 <div class="side-menu-container">
                     <div class="navbar-header">
-                        <a class="navbar-brand" href="{{ route('voyager.dashboard') }}" style="background: #3FC380;">
+                        <a class="navbar-brand" href="/home" style="background: #3FC380;">
                             <div style="padding-left: 38px; font-size: 20px; float:center">Electronic Discovery</div>
                         </a>
 

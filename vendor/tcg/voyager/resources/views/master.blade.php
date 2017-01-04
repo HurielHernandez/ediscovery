@@ -48,10 +48,6 @@
 
 <body class="flat-blue">
 
-<div id="voyager-loader">
-    <img src="{{ config('voyager.assets_path') }}/images/logo-icon.png" alt="Voyager Loader">
-</div>
-
 <?php
 $user_avatar = Voyager::image(Auth::user()->avatar);
 if ((substr(Auth::user()->avatar, 0, 7) == 'http://') || (substr(Auth::user()->avatar, 0, 8) == 'https://')) {

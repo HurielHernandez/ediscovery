@@ -17,4 +17,7 @@ return array(
     '58571171fd5812e6e447dce228f52f4d' => $vendorDir . '/laravel/framework/src/Illuminate/Support/helpers.php',
     'a0edc8309cc5e1d60e3047b5df6b7052' => $vendorDir . '/guzzlehttp/psr7/src/functions_include.php',
     'ae2fadc5a311f32b20ba30a524ca3683' => $vendorDir . '/pragmarx/support/src/helpers.php',
+    'a7cee959d5f14eb7484e7f8e7182e03d' => $vendorDir . '/geoip/geoip/src/geoip.inc',
+    '8cf74b4cf02ad0591c257dcfb7edbc8d' => $vendorDir . '/geoip/geoip/src/geoipcity.inc',
+    'd114bd5194e69687495c9150ff6be780' => $vendorDir . '/geoip/geoip/src/timezone.php',
 );

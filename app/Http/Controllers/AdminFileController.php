@@ -46,6 +46,7 @@ class AdminFileController extends Controller
 
    	public function store(Request $request, $id)
 	{
+		//dd($request->hasFile('files'));
 		Voyager::can('add_files');
 
 		$user = Auth::user();

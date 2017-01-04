@@ -37,11 +37,11 @@ return [
      *
      */
 
-    'block_response_code' => 403,
+    'block_response_code' => 404,
 
     'block_response_message' => null,
 
-    'block_response_abort' => false, // return abort() instead of Response::make() - disabled by default
+    'block_response_abort' => true, // return abort() instead of Response::make() - disabled by default
 
     /**
      * Do you wish to redirect non whitelisted accesses to an error page?

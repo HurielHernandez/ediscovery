@@ -2,6 +2,8 @@
 
 @section('head')
 <link rel="stylesheet" href="/css/jquery.fileupload.css">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 @stop
 
 @section('page_header')
@@ -146,6 +148,10 @@ $(function () {
 
     // Initialize the jQuery File Upload widget:
     $('#fileupload').fileupload({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        //maxChunkSize: 10000000, // 10 MB
         // Uncomment the following to send cross-domain cookies:
         //xhrFields: {withCredentials: true},
         url: '/admin/cases/{{$case->id}}/files/upload'
