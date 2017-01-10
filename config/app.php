@@ -180,6 +180,7 @@ return [
         TCG\Voyager\VoyagerServiceProvider::class,
         PragmaRX\Firewall\Vendor\Laravel\ServiceProvider::class,
         PragmaRX\Tracker\Vendor\Laravel\ServiceProvider::class,
+        JildertMiedema\LaravelPlupload\LaravelPluploadServiceProvider::class,
 
 
     ],
@@ -230,7 +231,8 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,   
         'Firewall' => PragmaRX\Firewall\Vendor\Laravel\Facade::class,
-        'Tracker' => PragmaRX\Tracker\Vendor\Laravel\Facade::class
+        'Tracker' => PragmaRX\Tracker\Vendor\Laravel\Facade::class,
+        'Plupload' => JildertMiedema\LaravelPlupload\Facades\Plupload::class,
 
     ],
 

@@ -174,7 +174,7 @@ class AdminUserCaseController extends Controller
     	$access->case_id = $case->id;
     	$access->user_id = $userToAdd->id;
     	$access->access_on = Carbon::now();
-    	$access->revoke_on = Carbon::now()->addDays(1);
+    	$access->revoke_on = Carbon::now()->addDays(30);
     	$access->access_by = $Authuser->id;
 
     	$access->save();

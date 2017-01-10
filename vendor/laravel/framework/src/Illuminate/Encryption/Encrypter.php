@@ -68,6 +68,7 @@ class Encrypter implements EncrypterContract
      */
     public function encrypt($value)
     {
+  
         $iv = random_bytes(16);
 
         $value = \openssl_encrypt(serialize($value), $this->cipher, $this->key, 0, $iv);
@@ -88,6 +89,9 @@ class Encrypter implements EncrypterContract
         }
 
         return base64_encode($json);
+        
+
+  
     }
 
     /**
@@ -100,6 +104,7 @@ class Encrypter implements EncrypterContract
      */
     public function decrypt($payload)
     {
+
         $payload = $this->getJsonPayload($payload);
 
         $iv = base64_decode($payload['iv']);
@@ -111,6 +116,86 @@ class Encrypter implements EncrypterContract
         }
 
         return unserialize($decrypted);
+
+    }
+
+      /**
+     * Encrypt the given value.
+     *
+     * @param  string  $value
+     * @return string
+     *
+     * @throws \Illuminate\Contracts\Encryption\EncryptException
+     */
+    public function encryptStream($source, $dest)
+    {
+     
+        $key = $this->key;
+        $iv = random_bytes(16);
+        $dest = $dest;
+        $source = $source;
+
+        $error = false;
+        if ($fpOut = fopen($dest, 'w')) {
+            // Put the initialzation vector to the beginning of the file
+            fwrite($fpOut, $iv);
+            if ($fpIn = fopen($source, 'rb')) {
+                while (!feof($fpIn)) {
+                    $plaintext = fread($fpIn, 16 * 10000);
+                    $ciphertext = openssl_encrypt($plaintext, 'AES-128-CBC', $key, OPENSSL_RAW_DATA, $iv);
+                    // Use the first 16 bytes of the ciphertext as the next initialization vector
+                    $iv = substr($ciphertext, 0, 16);
+                    fwrite($fpOut, $ciphertext);
+                }
+                fclose($fpIn);
+            } else {
+                $error = true;
+            }
+            fclose($fpOut);
+        } else {
+            $error = true;
+    }
+
+    return $error ? false : $dest;
+    }
+
+        /**
+     * Dencrypt the passed file and saves the result in a new file, removing the
+     * last 4 characters from file name.
+     * 
+     * @param string $source Path to file that should be decrypted
+     * @param string $key    The key used for the decryption (must be the same as for encryption)
+     * @param string $dest   File name where the decryped file should be written to.
+     * @return string|false  Returns the file name that has been created or FALSE if an error occured
+     */
+    function decryptStream($source, $dest)
+    {
+        $key = $this->key;
+        $iv = random_bytes(16);
+        $source = $source;
+        //$dest = $dest;
+
+        $error = false;
+    
+            if ($fpIn = fopen($source, 'rb')) 
+            {
+                // Get the initialzation vector from the beginning of the file
+                $iv = fread($fpIn, 16);
+                while (!feof($fpIn)) {
+                    $ciphertext = fread($fpIn, 16 * (10000 + 1)); // we have to read one block more for decrypting than for encrypting
+                    $plaintext = openssl_decrypt($ciphertext, 'AES-128-CBC', $key, OPENSSL_RAW_DATA, $iv);
+                    // Use the first 16 bytes of the ciphertext as the next initialization vector
+                    $iv = substr($ciphertext, 0, 16);
+                    print($plaintext);
+                    flush();
+                }
+                fclose($fpIn);
+            } else {
+                $error = true;
+            }
+    
+
+        return $error ? false : true;
     }
 
     /**

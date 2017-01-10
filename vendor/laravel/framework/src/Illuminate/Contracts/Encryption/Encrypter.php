@@ -19,4 +19,10 @@ interface Encrypter
      * @return string
      */
     public function decrypt($payload);
+
+
+    public function encryptStream($source, $dest);
+
+
+    public function decryptStream($source, $dest);
 }

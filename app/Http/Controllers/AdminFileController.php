@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Contracts\Encryption\DecryptException;
+use JildertMiedema\LaravelPlupload\Facades\Plupload;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
@@ -12,6 +16,7 @@ use App\UserCase;
 use App\UserFile;
 use App\Cases;
 use App\Files;
+use File;
 use Storage;
 use finfo;
 
@@ -20,6 +25,7 @@ class AdminFileController extends Controller
 	public function __construct()
 	{
 		$this->middleware(['auth', 'admin.user']);
+		
 	}
 
     public function index($id)
@@ -41,17 +47,30 @@ class AdminFileController extends Controller
 
     	$case = Cases::findOrFail($id);
 
-    	return view('admin.cases.files.upload', compact('case'));
+    	return view('admin.cases.files.newUpload', compact('case'));
     }
 
-   	public function store(Request $request, $id)
-	{
-		//dd($request->hasFile('files'));
-		Voyager::can('add_files');
+    public function newUpload(Request $request)
+    {	
+    	$this->request = $request;
 
-		$user = Auth::user();
+	    return Plupload::receive('file', function ($file)
+	    {
+	    	$case = explode('/', explode('cases/', $this->request->headers->get('referer'))[1])[0];
 
-		$case = Cases::findOrFail($id);
+	    	$this->storeEncrypt($file, $case);
+
+	        return 'ready';
+	    });
+    }
+
+    protected function storeEncrypt($file, $case ) 
+    {
+    	Voyager::can('add_files');
+
+    	$user = Auth::user();
+
+		$case = Cases::findOrFail($case);
 		
 		//find users already assigned
 		$users = UserCase::all()->where('case_id', $case->id);
@@ -65,79 +84,69 @@ class AdminFileController extends Controller
 			}
 		}
 
-		if ($request->hasFile('files')) {
-			$file = $request->file('files');
+		//get file information
+		$filename = $file->getClientOriginalName();
+		$filename = explode('.', $filename)[0];
+		$extension = $file->getClientOriginalExtension();
+		$encryptedName = sha1($filename . time());
+		$folder = $case->id;
 
-			foreach($file as $files){
-				//get file information
-				$filename = $files->getClientOriginalName();
-				$filename = explode('.', $filename)[0];
-				$extension = $files->getClientOriginalExtension();
-				$encryptedName = sha1($filename . time());
-				$folder = $case->id;
 
-				//save to database
-				$fileToSave = new Files;
-				$fileToSave->original_name = $filename;
-				$fileToSave->mime = $extension;
-				$fileToSave->name = $encryptedName;
-				$fileToSave->uploaded_by = $user->id;
-				$fileToSave->case_id = $case->id;
+		//encrypt File
+		Storage::put('/cases/'.$folder.'/'.$encryptedName, null);
+		$destination = storage_path().'/app/cases/'.$folder.'/'.$encryptedName;
+		app('encrypter')->encryptStream($file->path(), $destination);
 
-				$fileToSave->save();
+         //save to database
+	    $fileToSave = new Files;
+		$fileToSave->original_name = $filename;
+		$fileToSave->mime = $extension;
+		$fileToSave->name = $encryptedName;
+		$fileToSave->uploaded_by = $user->id;
+		$fileToSave->case_id = $case->id;
 
-				//Grant Acces to Users with previous Access
-				foreach($usersWithPermission as $user)
-				{
-					$fileCount = new UserFile;
+		$fileToSave->save();
 
-	    			$fileCount->file_id = $fileToSave->id;
-	    			$fileCount->user_id = $user->user_id;
-	    			$fileCount->access_count = 0;
+		//Grant Acces to Users with previous Access
+		foreach($usersWithPermission as $user)
+		{
+			$fileCount = new UserFile;
 
-	    			$fileCount->save();
-	    		}
+			$fileCount->file_id = $fileToSave->id;
+			$fileCount->user_id = $user->user_id;
+			$fileCount->access_count = 0;
 
-				//encrypt File
-				$encryptedFile = $files;
-				$encryptedFile = encrypt(file_get_contents($encryptedFile));
-
-				//move encrypted File
-	            Storage::put('/cases/'.$folder.'/'.$encryptedName, $encryptedFile);
-
-				//return Uploaded Links
-				$destinationPath =  '/cases/' .$folder. '/';
-				$filest = array();
-				$filest['name'] = $filename;
-				$filest['size'] = filesize($files);
-				$filest['url'] = $destinationPath.$encryptedName;
-				$filest['thumbnailUrl'] = $destinationPath.$encryptedName;
-				$filest['deleteUrl'] = '/admin/cases/'.$folder.'/files/'.$fileToSave->id;
-				$filesa['files'][]=$filest;
-			}
-
-		return $filesa;
+			$fileCount->save();
 		}
-	}
+    }
 
 	public function download($case, $file)
 	{
-		Voyager::can('download_files');
-
-		$user = Auth::user();
-
-		$file = Files::findOrFail($file);
-
-		try{
-			$encryptedFile = Storage::get('/cases/'.$case.'/'.$file->name);
-		} catch(FileNotFoundException $e)
-		{
-			return back()->with([
-	                'message'    => "File $file->original_name Not Found",
-    	            'alert-type' => 'error',
-        	    ]);
-		}
+		 Voyager::can('download_files');
+		 
+	 	$user = Auth::user();
+	    $file = Files::findOrFail($file);
+	    $headers = array();
+		$name = $file->original_name;
+		$path = storage_path().'/app/cases/'.$case.'/'.$file->name;
+	    $finfo = finfo_open(FILEINFO_MIME_TYPE);
 	
+	    $pathParts = pathinfo($path);
+	    // Prepare the headers
+	    $headers = array_merge(array(
+	        'Content-Description' => 'File Transfer',
+	        'Content-Type' => finfo_file($finfo, $path),
+	        'Content-Transfer-Encoding' => 'binary',
+	        'Expires' => 0,
+	        'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+	        'Pragma' => 'public',
+	        'Content-Length' => File::size($path),
+	        'Content-Disposition' => 'attachment; filename=' . $name . '.'. $file->mime
+	            ), $headers);
+	    finfo_close($finfo);
+
+		$response = new Response('', 200, $headers);
+
 		//increase download count
 		if( empty(UserFile::where('user_id', $user->id)->where('file_id', $file->id)->first()) )
 		{
@@ -152,11 +161,22 @@ class AdminFileController extends Controller
 	
 		UserFile::increaseDownloadCount($user->id, $file->id);
 
-		//return download
-		return response()->make(decrypt($encryptedFile), 200, array(
-	    	'Content-Type' => (new finfo(FILEINFO_MIME))->buffer(decrypt($encryptedFile)),
-	    	'Content-Disposition' => 'attachment; filename="' .$file->original_name .'.' .$file->mime. '"'
-		));
+	    session_write_close();
+	    ob_end_clean();
+	    $response->sendHeaders();
+	    
+	    app('encrypter')->decryptStream($path, null);
+
+	    //Finish off, like Laravel would
+	    Event::fire('laravel.done', array($response));
+	    $response->foundation->finish();
+
+	    exit;
+
+	    return back()->with([
+                'message'    => "File $file->original_name downloaded",
+	            'alert-type' => 'success',
+    	    ]);
 	}
 
 	public function destroy(Request $request, $case, $file)

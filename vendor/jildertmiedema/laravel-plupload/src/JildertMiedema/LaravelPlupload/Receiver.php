@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 
+
 class Receiver
 {
     private $maxFileAge = 600; //600 secondes
@@ -15,6 +16,7 @@ class Receiver
     public function __construct(Request $request)
     {
         $this->request = $request;
+
     }
 
     public function getPath()
@@ -42,7 +44,7 @@ class Receiver
         if (!$out = @fopen($filePathPartial, 'ab')) {
             throw new PluploadException('Failed to open output stream.', 102);
         }
-
+        
         if (!$in = @fopen($file->getPathname(), 'rb')) {
             throw new PluploadException('Failed to open input stream', 101);
         }
@@ -52,6 +54,8 @@ class Receiver
 
         @fclose($out);
         @fclose($in);
+
+
     }
 
     public function receiveChunks($name, Closure $handler)
@@ -96,7 +100,7 @@ class Receiver
     public function receive($name, Closure $handler)
     {
         $response = [];
-        $response['jsonrpc'] = '2.0';
+   
 
         if ($this->hasChunks()) {
             $result = $this->receiveChunks($name, $handler);

@@ -90,7 +90,7 @@ Route::group(['middleware' => 'fw-allow-wl'], function (){
 
 			Route::get('/upload', 'AdminFileController@upload');
 
-			Route::post('/upload', 'AdminFileController@store');
+			Route::post('/upload', 'AdminFileController@newUpload');
 
 			Route::get('/{file}/download', 'AdminFileController@download');
 
@@ -110,7 +110,7 @@ Route::group(['middleware' => 'fw-allow-wl'], function (){
 
 			Route::get('/{user}/edit', 'AdminUserCaseController@edit');
 
-			Route::patch('/{user}/edit', 'AdminUserCaseController@update');
+			Route::patch('/{user}/edit', 'AdminUserCaseController@newUpdate');
 
 			Route::delete('/{user}/', 'AdminUserCaseController@revoke');
 
