@@ -1,4 +1,4 @@
-Hidalgo County DA Electronic Discovery
+Electronic Discovery prototype using Laravel
 
 ## Setup
 
